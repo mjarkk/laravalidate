@@ -65,6 +65,67 @@ type UserRequest struct {
 }
 ```
 
+## More error info
+
+```go
+type UserRequest struct {
+	Email string `json:"email" validate:"email"`
+	Name  string `json:"name" validate:"required"`
+}
+
+func main() {
+	err := laravalidate.JsonValidate(context.Background(), nil, UserRequest{})
+	if err == nil {
+		os.Exit(0)
+	}
+
+	errInfo := err.(*laravalidate.ValidationError)
+	for _, fieldError := range errInfo.Errors {
+		fmt.Println("field:", fieldError.JsonPath)
+		for _, err := range fieldError.Errors {
+			fmt.Printf("  %+v\n", err)
+		}
+	}
+}
+```
+
+## Laravel style errors
+
+For when you are converting a laravel application to a go application and want to keep the error messages the same.
+
+```go
+type UserRequest struct {
+	Email string `json:"email" validate:"email"`
+	Name  string `json:"name" validate:"required"`
+}
+
+func main() {
+	err := laravalidate.JsonValidate(context.Background(), nil, UserRequest{})
+	if err == nil {
+		os.Exit(0)
+	}
+
+	laravelErr := err.(*laravalidate.ValidationError).ToLaravelError()
+	laravelErrJson, err := json.MarshalIndent(laravelErr, "", "  ")
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Println(string(laravelErrJson))
+	/*{
+	  "errors": {
+	    "email": [
+	      "The email field must be a valid email address."
+	    ],
+	    "name": [
+	      "The name field is required."
+	    ]
+	  },
+	  "message": "Form contains errors"
+  }*/
+}
+```
+
 ## Go style errors
 
 It might be that you are not validating json messages but rather go structs or something else.
