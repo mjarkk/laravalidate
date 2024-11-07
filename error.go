@@ -10,8 +10,16 @@ type ValidationError struct {
 	Errors   []FieldErrors `json:"errors"`
 }
 
-func (*ValidationError) Error() string {
-	return "Validation Error"
+const fallbackErrorMessage = "Validation Error"
+
+func (v *ValidationError) Error() string {
+	for _, err := range v.Errors {
+		for _, field := range err.Errors {
+			return field.Message
+		}
+	}
+
+	return fallbackErrorMessage
 }
 
 type FieldErrors struct {

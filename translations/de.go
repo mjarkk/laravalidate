@@ -1,9 +1,12 @@
 package translations
 
-import . "github.com/mjarkk/laravalidate"
+import (
+	. "github.com/mjarkk/laravalidate"
+	"golang.org/x/text/language"
+)
 
 func RegisterDeTranslations() {
-	BaseRegisterMessages(map[string]MessageResolver{
+	RegisterMessages(language.German, map[string]MessageResolver{
 		"accepted": BasicMessageResolver("Das :attribute Feld muss akzeptiert werden."),
 		// "accepted_if": BasicMessageResolver("Das :attribute Feld muss akzeptiert werden, wenn :other :value ist."),
 		"active_url":     BasicMessageResolver("Das :attribute Feld muss eine gültige URL sein."),

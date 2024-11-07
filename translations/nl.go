@@ -1,9 +1,12 @@
 package translations
 
-import . "github.com/mjarkk/laravalidate"
+import (
+	. "github.com/mjarkk/laravalidate"
+	"golang.org/x/text/language"
+)
 
 func RegisterNlTranslations() {
-	BaseRegisterMessages(map[string]MessageResolver{
+	RegisterMessages(language.Dutch, map[string]MessageResolver{
 		"accepted": BasicMessageResolver("Het :attribute veld moet worden geaccepteerd."),
 		// "accepted_if": BasicMessageResolver("Het :attribute veld moet worden geaccepteerd wanneer :other :value is."),
 		"active_url":     BasicMessageResolver("Het :attribute veld moet een geldige URL zijn."),
