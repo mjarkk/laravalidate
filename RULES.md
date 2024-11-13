@@ -187,6 +187,18 @@ The field under validation must not be empty when it is present.
 
 This validator is almost equal to the `required` validator except that it allows nil values.
 
+### `gt:field`
+
+The field under validation must be greater than the given field.
+The two fields must be of the same type.
+Strings, numerics, arrays, and files are evaluated using the same conventions as the size rule.
+
+### `gte:field`
+
+The field under validation must be greater than or equal to the given field or value.
+The two fields must be of the same type.
+Strings, numerics, arrays, and files are evaluated using the same conventions as the size rule.
+
 ### `hex_color`
 
 The field under validation must contain a valid color value in [hexadecimal](https://developer.mozilla.org/en-US/docs/Web/CSS/hex-color) format.
@@ -210,6 +222,18 @@ The field under validation must be an IPv6 address.
 ### `json`
 
 The field under validation must be a valid JSON `string` or `[]byte`.
+
+### `lt:field`
+
+The field under validation must be less than the given field.
+The two fields must be of the same type.
+Strings, numerics, arrays, and files are evaluated using the same conventions as the size rule.
+
+### `lte:field`
+
+The field under validation must be less than or equal to the given field.
+The two fields must be of the same type.
+Strings, numerics, arrays, and files are evaluated using the same conventions as the size rule.
 
 ### `lowercase`
 

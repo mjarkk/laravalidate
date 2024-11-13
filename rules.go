@@ -74,10 +74,8 @@ func init() {
 	// File
 
 	RegisterValidator("filled", Filled)
-
-	// Greater Than
-	// Greater Than Or Equal
-
+	RegisterValidator("gt", Gt)
+	RegisterValidator("gte", Gte)
 	RegisterValidator("hex_color", HexColor)
 
 	// Image (File)
@@ -91,10 +89,8 @@ func init() {
 	RegisterValidator("ipv4", IPV4)
 	RegisterValidator("ipv6", IPV6)
 	RegisterValidator("json", JSON)
-
-	// Less Than
-	// Less Than Or Equal
-
+	RegisterValidator("lt", Lt)
+	RegisterValidator("lte", Lte)
 	RegisterValidator("lowercase", Lowercase)
 	// Unsupported: List
 	RegisterValidator("mac_address", MacAddress)
@@ -205,18 +201,18 @@ func init() {
 		"extensions": BasicMessageResolver("The :attribute field must have one of the following extensions: :args."),
 		// "file":       BasicMessageResolver("The :attribute field must be a file."),
 		"filled": BasicMessageResolver("The :attribute field must have a value."),
-		// "gt": MessageHintResolver{Hints: map[string]string{
-		// 	"array":   "The :attribute field must have more than :value items.",
-		// 	"file":    "The :attribute field must be greater than :value kilobytes.",
-		// 	"numeric": "The :attribute field must be greater than :value.",
-		// 	"string":  "The :attribute field must be greater than :value characters.",
-		// }},
-		// "gte": MessageHintResolver{Hints: map[string]string{
-		// 	"array":   "The :attribute field must have :value items or more.",
-		// 	"file":    "The :attribute field must be greater than or equal to :value kilobytes.",
-		// 	"numeric": "The :attribute field must be greater than or equal to :value.",
-		// 	"string":  "The :attribute field must be greater than or equal to :value characters.",
-		// }},
+		"gt": MessageHintResolver{Hints: map[string]string{
+			"array":   "The :attribute field must have more than :value items.",
+			"file":    "The :attribute field must be greater than :value kilobytes.",
+			"numeric": "The :attribute field must be greater than :value.",
+			"string":  "The :attribute field must be greater than :value characters.",
+		}},
+		"gte": MessageHintResolver{Hints: map[string]string{
+			"array":   "The :attribute field must have :value items or more.",
+			"file":    "The :attribute field must be greater than or equal to :value kilobytes.",
+			"numeric": "The :attribute field must be greater than or equal to :value.",
+			"string":  "The :attribute field must be greater than or equal to :value characters.",
+		}},
 		"hex_color": BasicMessageResolver("The :attribute field must be a valid hexadecimal color."),
 		// "image":     BasicMessageResolver("The :attribute field must be an image."),
 		"in": BasicMessageResolver("The selected :attribute is invalid."),
@@ -228,18 +224,18 @@ func init() {
 		"json": BasicMessageResolver("The :attribute field must be a valid JSON string."),
 		// "list":      BasicMessageResolver("The :attribute field must be a list."),
 		"lowercase": BasicMessageResolver("The :attribute field must be lowercase."),
-		// "lt": MessageHintResolver{Hints: map[string]string{
-		// 	"array":   "The :attribute field must have less than :value items.",
-		// 	"file":    "The :attribute field must be less than :value kilobytes.",
-		// 	"numeric": "The :attribute field must be less than :value.",
-		// 	"string":  "The :attribute field must be less than :value characters.",
-		// }},
-		// "lte": MessageHintResolver{Hints: map[string]string{
-		// 	"array":   "The :attribute field must not have more than :value items.",
-		// 	"file":    "The :attribute field must be less than or equal to :value kilobytes.",
-		// 	"numeric": "The :attribute field must be less than or equal to :value.",
-		// 	"string":  "The :attribute field must be less than or equal to :value characters.",
-		// }},
+		"lt": MessageHintResolver{Hints: map[string]string{
+			"array":   "The :attribute field must have less than :value items.",
+			"file":    "The :attribute field must be less than :value kilobytes.",
+			"numeric": "The :attribute field must be less than :value.",
+			"string":  "The :attribute field must be less than :value characters.",
+		}},
+		"lte": MessageHintResolver{Hints: map[string]string{
+			"array":   "The :attribute field must not have more than :value items.",
+			"file":    "The :attribute field must be less than or equal to :value kilobytes.",
+			"numeric": "The :attribute field must be less than or equal to :value.",
+			"string":  "The :attribute field must be less than or equal to :value characters.",
+		}},
 		"mac_address": BasicMessageResolver("The :attribute field must be a valid MAC address."),
 		"max": MessageHintResolver{
 			Fallback: "The :attribute field must not be greater than :arg.",
@@ -1711,6 +1707,160 @@ func Confirmed(ctx *ValidatorCtx) (string, bool) {
 
 	if !equal(*ctx.Value, *toCompare.Value) {
 		return "not_equal", false
+	}
+
+	return "", true
+}
+
+type SizeCompareStatus uint8
+
+const (
+	SizeCompareStatusEq SizeCompareStatus = iota
+	SizeCompareStatusLt
+	SizeCompareStatusGt
+)
+
+func compareFieldsBase(ctx *ValidatorCtx) (SizeCompareStatus, ConvertStatus) {
+	if len(ctx.Args) == 0 {
+		return 0, Invalid
+	}
+
+	ctx.UnwrapPointer()
+
+	if !ctx.HasValue() {
+		return 0, ValueNil
+	}
+
+	other := ctx.Field(ctx.Args[0])
+	other.UnwrapPointer()
+
+	if !other.HasValue() {
+		return 0, Invalid
+	}
+
+	if ctx.IsNumeric() || other.IsNumeric() {
+		if !ctx.IsNumeric() || !other.IsNumeric() {
+			return 0, InvalidType
+		}
+
+		if ctx.IsFloat() || other.IsFloat() {
+			aValue, aOk := ctx.Float64()
+			bValue, bOk := other.Float64()
+			if !aOk || !bOk {
+				return 0, InvalidType
+			}
+
+			if aValue == bValue {
+				return SizeCompareStatusEq, ConverstionOk
+			}
+			if aValue < bValue {
+				return SizeCompareStatusLt, ConverstionOk
+			}
+			return SizeCompareStatusGt, ConverstionOk
+		}
+
+		if ctx.IsUint() && other.IsUint() {
+			aValue := ctx.Value.Uint()
+			bValue := other.Value.Uint()
+
+			if aValue == bValue {
+				return SizeCompareStatusEq, ConverstionOk
+			}
+			if aValue < bValue {
+				return SizeCompareStatusLt, ConverstionOk
+			}
+			return SizeCompareStatusGt, ConverstionOk
+		}
+
+		aValue, aOk := ctx.Int64()
+		bValue, bOk := other.Int64()
+		if !aOk || !bOk {
+			return 0, InvalidType
+		}
+
+		if aValue == bValue {
+			return SizeCompareStatusEq, ConverstionOk
+		}
+		if aValue < bValue {
+			return SizeCompareStatusLt, ConverstionOk
+		}
+		return SizeCompareStatusGt, ConverstionOk
+	}
+
+	compareLen := false
+	if ctx.IsList() || other.IsList() {
+		if !ctx.IsList() || !other.IsList() {
+			return 0, InvalidType
+		}
+		compareLen = true
+	}
+
+	if ctx.Kind() == reflect.String && other.Kind() == reflect.String {
+		compareLen = true
+	}
+
+	if compareLen {
+		aLen := ctx.Value.Len()
+		bLen := other.Value.Len()
+		if aLen == bLen {
+			return SizeCompareStatusEq, ConverstionOk
+		}
+		if aLen < bLen {
+			return SizeCompareStatusLt, ConverstionOk
+		}
+		return SizeCompareStatusGt, ConverstionOk
+	}
+
+	return 0, InvalidType
+}
+
+func Gt(ctx *ValidatorCtx) (string, bool) {
+	sizeStatus, status := compareFieldsBase(ctx)
+	if !status.Oke() {
+		return status.Response()
+	}
+
+	if sizeStatus != SizeCompareStatusGt {
+		return "lt", false
+	}
+
+	return "", true
+}
+
+func Gte(ctx *ValidatorCtx) (string, bool) {
+	sizeStatus, status := compareFieldsBase(ctx)
+	if !status.Oke() {
+		return status.Response()
+	}
+
+	if sizeStatus == SizeCompareStatusLt {
+		return "lt", false
+	}
+
+	return "", true
+}
+
+func Lt(ctx *ValidatorCtx) (string, bool) {
+	sizeStatus, status := compareFieldsBase(ctx)
+	if !status.Oke() {
+		return status.Response()
+	}
+
+	if sizeStatus != SizeCompareStatusLt {
+		return "gt", false
+	}
+
+	return "", true
+}
+
+func Lte(ctx *ValidatorCtx) (string, bool) {
+	sizeStatus, status := compareFieldsBase(ctx)
+	if !status.Oke() {
+		return status.Response()
+	}
+
+	if sizeStatus == SizeCompareStatusGt {
+		return "gt", false
 	}
 
 	return "", true

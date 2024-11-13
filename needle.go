@@ -220,6 +220,16 @@ func (n *Needle) IsNumeric() bool {
 	}
 }
 
+// IsBool returns true if the type kind is a list
+func (n *Needle) IsList() bool {
+	switch n.Kind() {
+	case reflect.Slice, reflect.Array:
+		return true
+	default:
+		return false
+	}
+}
+
 // HasLen returns true if the type kind supports the reflect.Len method
 func (n *Needle) HasLen() bool {
 	switch n.Kind() {
@@ -264,4 +274,38 @@ func (n *Needle) Date() (time.Time, ConvertStatus) {
 	default:
 		return time.Time{}, InvalidType
 	}
+}
+
+// Float64 tries to convert the number to a float64
+func (n *Needle) Float64() (float64, bool) {
+	if !n.HasValue() {
+		return 0, false
+	}
+
+	switch n.Kind() {
+	case reflect.Float32, reflect.Float64:
+		return n.Value.Float(), true
+	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+		return float64(n.Value.Int()), true
+	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+		return float64(n.Value.Uint()), true
+	}
+
+	return 0, false
+}
+
+// Int64 tries to convert the number to a int64
+func (n *Needle) Int64() (int64, bool) {
+	if !n.HasValue() {
+		return 0, false
+	}
+
+	switch n.Kind() {
+	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+		return n.Value.Int(), true
+	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+		return int64(n.Value.Uint()), true
+	}
+
+	return 0, false
 }
