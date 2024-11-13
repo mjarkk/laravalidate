@@ -169,6 +169,12 @@ Flags:
 
 The field under validation must end with one of the given values.
 
+### `exists`
+
+[Requires dbrules to be setup!](./README.md#database-rules)
+
+
+
 ### `extensions:jpg,png,...`
 
 The file under validation must have a matching extension.

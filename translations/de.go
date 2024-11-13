@@ -50,7 +50,7 @@ func RegisterDeTranslations() {
 		"email":     BasicMessageResolver("Das :attribute Feld muss eine gültige E-Mail-Adresse sein."),
 		"ends_with": BasicMessageResolver("Das :attribute Feld muss mit einem der folgenden Werte enden: :args."),
 		// "enum":    BasicMessageResolver("Der ausgewählte :attribute ist ungültig."),
-		// "exists":  BasicMessageResolver("Der ausgewählte :attribute ist ungültig."),
+		"exists":     BasicMessageResolver("Der ausgewählte :attribute ist ungültig."),
 		"extensions": BasicMessageResolver("Das :attribute Feld muss eine der folgenden Erweiterungen haben: :args."),
 		// "file":       BasicMessageResolver("Das :attribute Feld muss eine Datei sein."),
 		"filled": BasicMessageResolver("Das :attribute Feld muss einen Wert haben."),

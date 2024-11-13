@@ -50,7 +50,7 @@ func RegisterEsTranslations() {
 		"email":     BasicMessageResolver("El campo :attribute debe ser una dirección de correo electrónico válida."),
 		"ends_with": BasicMessageResolver("El campo :attribute debe terminar con uno de los siguientes: :args."),
 		// "enum":    BasicMessageResolver("El :attribute seleccionado es inválido."),
-		// "exists":  BasicMessageResolver("El :attribute seleccionado es inválido."),
+		"exists":     BasicMessageResolver("El :attribute seleccionado es inválido."),
 		"extensions": BasicMessageResolver("El campo :attribute debe tener una de las siguientes extensiones: :args."),
 		// "file":       BasicMessageResolver("El campo :attribute debe ser un archivo."),
 		"filled": BasicMessageResolver("El campo :attribute debe tener un valor."),

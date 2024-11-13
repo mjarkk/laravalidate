@@ -67,8 +67,8 @@ func init() {
 	// Exclude Unless
 	// Exclude With
 	// Exclude Without
-	// Exists (Database)
 
+	// Provided by dbrules: Exists
 	RegisterValidator("extensions", Extensions)
 
 	// File
@@ -201,7 +201,7 @@ func init() {
 		"email":     BasicMessageResolver("The :attribute field must be a valid email address."),
 		"ends_with": BasicMessageResolver("The :attribute field must end with one of the following: :args."),
 		// "enum":    BasicMessageResolver("The selected :attribute is invalid."),
-		// "exists":  BasicMessageResolver("The selected :attribute is invalid."),
+		"exists":     BasicMessageResolver("The selected :attribute is invalid."),
 		"extensions": BasicMessageResolver("The :attribute field must have one of the following extensions: :args."),
 		// "file":       BasicMessageResolver("The :attribute field must be a file."),
 		"filled": BasicMessageResolver("The :attribute field must have a value."),

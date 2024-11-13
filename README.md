@@ -36,7 +36,9 @@ func main() {
 
 All the rules are defined in: [RULES.md](./RULES.md)
 
-Most laraval rules are supported except for the database related rules.
+Most laraval rules are supported*.
+
+(*database related rules can be added using the `dbrules` package and currently only support sql databases)
 
 Rules can be set using the `validate` tag on a struct field like:
 
@@ -62,6 +64,24 @@ type UserRequest struct {
 	// The emails list is required and must at least contain one element.
 	// The elements in the list must be valid email addresses.
 	Emails []string `json:"emails" validate:"required" validateInner:"email"`
+}
+```
+
+## Database rules
+
+Database rules are not out of the box provided as they require a database connection.
+
+For sql connections they can be implemented using the `dbrules` package.
+
+```go
+func main() {
+	db, err := sql.Open(driverName, dns)
+	// Check err
+
+	dbrules.AddRules(db)
+
+	// Now you can add translations!
+	// translations.RegisterNlTranslations()
 }
 ```
 
@@ -135,6 +155,9 @@ This can be done using the `laravalidate.GoValidate` method
 
 ```go
 func main() {
+	// If you are using the db rules,
+	// you should add them before registering any translations!
+
 	translations.RegisterNlTranslations()
 
 	input := struct {

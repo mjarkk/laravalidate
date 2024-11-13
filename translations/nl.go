@@ -50,7 +50,7 @@ func RegisterNlTranslations() {
 		"email":     BasicMessageResolver("Het :attribute veld moet een geldig e-mailadres zijn."),
 		"ends_with": BasicMessageResolver("Het :attribute veld moet eindigen met een van de volgende: :args."),
 		// "enum":    BasicMessageResolver("De geselecteerde :attribute is ongeldig."),
-		// "exists":  BasicMessageResolver("De geselecteerde :attribute is ongeldig."),
+		"exists":     BasicMessageResolver("De geselecteerde :attribute is ongeldig."),
 		"extensions": BasicMessageResolver("Het :attribute veld moet een van de volgende extensies hebben: :args."),
 		// "file":       BasicMessageResolver("Het :attribute veld moet een bestand zijn."),
 		"filled": BasicMessageResolver("Het :attribute veld moet een waarde hebben."),

@@ -85,7 +85,7 @@ func registerMessagesForLangs(langs []string, resolvers map[string]MessageResolv
 	for name, resolver := range resolvers {
 		validator, ok := validators[name]
 		if !ok {
-			fmt.Printf(`Laravalidate: Trying to register error message for validation rule that does not exists "%s"`+"\n", name)
+			// fmt.Printf(`Laravalidate: Trying to register error message for validation rule that does not exists "%s"`+"\n", name)
 			continue
 		}
 		for _, lang := range langs {
