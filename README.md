@@ -170,27 +170,23 @@ func main() {
 }
 ```
 
-Nested fields can be accessed using the `.` separator.
+Nested and spesific validators fields can be accessed using the `.` separator.
 For example when a field is nested under `Foo[3].Bar.Baz[2]` you can define the keys for it the following ways:
 
 - `Foo.3.Bar.Baz.2` (very strict)
+- `Foo.3.Bar.Baz.2.required` (only triggers on required rule)
 - `Foo.*.Bar.Baz.*` (lists have wild cards)
 - `Foo.Bar.Baz` (same as the prevouse one)
+- `Foo.Bar.Baz.required` (only triggers on the required rule)
 
-specific validators can also be targeted like so:
+There are also some variables that can be used in the custom error messages:
 
-```go
-type UserRequest struct {
-	Email string `json:"email" validate:"required|email"`
-}
-
-func (UserRequest) ValidationMessages() []laravalidate.CustomError {
-	return []laravalidate.CustomError{
-		{Key: "Email.required", Resolver: laravalidate.BasicMessageResolver("Bro email is required!")},
-		{Key: "Email.email", Resolver: laravalidate.BasicMessageResolver("Bogus email!")},
-	}
-}
-```
+- `:attribute` - The name of the field
+- `:value` - The value of the field
+- `:other` - If the value is compared to another value this will be the other value
+- `:date` - The date that is being validated in the DateTime format `2006-01-02 15:04:05`
+- `:args` - All the argument provided to the validator
+- `:arg0..x` (`arg4`) - A specific argument provided to the validator by index (0 based)
 
 ## Translations
 
