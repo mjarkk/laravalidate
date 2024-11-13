@@ -1732,6 +1732,10 @@ func compareFieldsBase(ctx *ValidatorCtx) (SizeCompareStatus, ConvertStatus) {
 	}
 
 	other := ctx.Field(ctx.Args[0])
+	if other == nil {
+		return 0, Invalid
+	}
+
 	other.UnwrapPointer()
 
 	if !other.HasValue() {
