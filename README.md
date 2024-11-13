@@ -302,7 +302,7 @@ func Accepted(ctx *ValidatorCtx) (string, bool) {
 
 func main() {
 	laravalidate.RegisterValidator("accepted", Accepted)
-	laravalidate.BaseRegisterMessages(map[string]laravalidate.CustomError{
+	laravalidate.BaseRegisterMessages(map[string]laravalidate.MessageResolver{
 		"accepted": laravalidate.BasicMessageResolver("The :attribute field must be accepted."),
 	})
 	// Now you can use the accepted validator
