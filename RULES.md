@@ -169,11 +169,13 @@ Flags:
 
 The field under validation must end with one of the given values.
 
-### `exists`
+### `exists:table,column`
 
 [Requires dbrules to be setup!](./README.md#database-rules)
 
+The field under validation must exist in a given database table.
 
+The column name is not required, by default it uses the `id` column.
 
 ### `extensions:jpg,png,...`
 
