@@ -23,9 +23,8 @@ func (v *ValidationError) Error() string {
 }
 
 type FieldErrors struct {
-	Path     string                `json:"goPath"`
-	JsonPath string                `json:"jsonPath"`
-	Errors   []FieldValidatorError `json:"errors"`
+	Path   string                `json:"path"`
+	Errors []FieldValidatorError `json:"errors"`
 }
 
 type FieldValidatorError struct {
@@ -73,9 +72,6 @@ func (e *ValidationError) ToLaravelError() *LaravelValidationError {
 
 	for _, entry := range e.Errors {
 		path := entry.Path
-		if e.Mode == JsonMode {
-			path = entry.JsonPath
-		}
 
 		errorMessages := []string{}
 		for _, validatorError := range entry.Errors {

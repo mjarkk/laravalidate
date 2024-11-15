@@ -134,8 +134,7 @@ func TestErrorMessages(t *testing.T) {
 	assert.Len(t, typedErr.Errors, 1)
 
 	firstErr := typedErr.Errors[0]
-	assert.Equal(t, "Message", firstErr.Path)
-	assert.Equal(t, "message", firstErr.JsonPath)
+	assert.Equal(t, "message", firstErr.Path)
 	assert.Len(t, firstErr.Errors, 1)
 
 	firstValidatorErr := firstErr.Errors[0]
@@ -178,7 +177,6 @@ func TestCustomErrorMessages(t *testing.T) {
 
 	firstErr := typedErr.Errors[0]
 	assert.Equal(t, "Inner.0.Inner2.Inner3", firstErr.Path)
-	assert.Equal(t, "Inner.0.Inner2.Inner3", firstErr.JsonPath)
 	assert.Len(t, firstErr.Errors, 1)
 
 	firstValidatorErr := firstErr.Errors[0]
