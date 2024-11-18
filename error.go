@@ -22,6 +22,16 @@ func (v *ValidationError) Error() string {
 	return fallbackErrorMessage
 }
 
+func (v *LaravelValidationError) Error() string {
+	for _, entry := range v.Errors {
+		for _, message := range entry.Value {
+			return message
+		}
+	}
+
+	return fallbackErrorMessage
+}
+
 type FieldErrors struct {
 	Path   string                `json:"path"`
 	Errors []FieldValidatorError `json:"errors"`
@@ -67,6 +77,7 @@ func (obj LaravelErrorObj) MarshalJSON() ([]byte, error) {
 	return resp, nil
 }
 
+// ToLaravelError converts a ValidationError to Laravel like validation error
 func (e *ValidationError) ToLaravelError() *LaravelValidationError {
 	errors := LaravelErrorObj{}
 
@@ -86,5 +97,13 @@ func (e *ValidationError) ToLaravelError() *LaravelValidationError {
 	return &LaravelValidationError{
 		Errors:  errors,
 		Message: "Form contains errors",
+	}
+}
+
+// Prefix prefixes all paths in the error with the given prefix
+func (e *ValidationError) Prefix(prefix string) {
+	for idx, fieldError := range e.Errors {
+		fieldError.Path = prefix + fieldError.Path
+		e.Errors[idx] = fieldError
 	}
 }
