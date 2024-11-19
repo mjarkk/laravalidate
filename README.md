@@ -78,7 +78,7 @@ func main() {
 	db, err := sql.Open(driverName, dns)
 	// Check err
 
-	dbrules.AddRules(db)
+	dbrules.AddRules(db, dbrules.DefaultStyle)
 
 	// Now you can add translations!
 	// translations.RegisterNlTranslations()

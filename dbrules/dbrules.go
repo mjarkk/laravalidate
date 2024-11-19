@@ -3,18 +3,30 @@ package dbrules
 import (
 	"database/sql"
 	"fmt"
+	"strconv"
+	"strings"
 
 	. "github.com/mjarkk/laravalidate"
 )
 
-type DB struct{ conn *sql.DB }
+type DB struct {
+	conn          *sql.DB
+	variableStyle QueryVariableStyle
+}
 
-func AddRules(conn *sql.DB) {
+type QueryVariableStyle uint8
+
+const (
+	DefaultStyle QueryVariableStyle = iota // ?
+	PgStyle                                // $1, $2, ...
+)
+
+func AddRules(conn *sql.DB, variableStyle QueryVariableStyle) {
 	if conn == nil {
 		panic("DB connection cannot be nil")
 	}
 
-	db := &DB{conn}
+	db := &DB{conn, variableStyle}
 
 	RegisterValidator("exists", db.Exists)
 
@@ -23,6 +35,21 @@ func AddRules(conn *sql.DB) {
 	})
 
 	LogValidatorsWithoutMessages()
+}
+
+func (b *DB) prepareQuery(in string) string {
+	switch b.variableStyle {
+	case PgStyle:
+		for i := 1; i <= strings.Count(in, "?"); i++ {
+			iStr := "$" + strconv.Itoa(i)
+			in = strings.Replace(in, "?", iStr, 1)
+		}
+	}
+	return in
+}
+
+func (b *DB) query(query string, args ...any) (*sql.Rows, error) {
+	return b.conn.Query(b.prepareQuery(query), args...)
 }
 
 func (b *DB) Exists(ctx *ValidatorCtx) (string, bool) {
@@ -46,19 +73,25 @@ func (b *DB) Exists(ctx *ValidatorCtx) (string, bool) {
 		return "", true
 	}
 
-	row := b.conn.QueryRow(
-		fmt.Sprintf("SELECT %s FROM %s WHERE %s = ? LIMIT 1", column, tableName, column),
+	query := fmt.Sprintf("SELECT %s FROM %s WHERE %s = ? LIMIT 1", column, tableName, column)
+	result, err := b.query(
+		query,
 		ctx.Value.Interface(),
 	)
-	if row.Err() != nil {
-		return "exists", false
-	}
-
-	resp := sql.RawBytes{}
-	err := row.Scan(&resp)
 	if err != nil {
 		return "exists", false
 	}
 
-	return "", true
+	defer result.Close()
+	for result.Next() {
+		resp := sql.RawBytes{}
+		err := result.Scan(&resp)
+		if err != nil {
+			return "exists", false
+		}
+
+		return "", true
+	}
+
+	return "exists", false
 }
