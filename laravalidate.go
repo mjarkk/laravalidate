@@ -35,11 +35,13 @@ func newValidator(ctx context.Context, languages []language.Tag, value reflect.V
 type Mode uint8
 
 const (
-	GoMode Mode = iota
-	JsonMode
+	GoMode   Mode = iota
+	JsonMode      // Tries to use json struct tags
+	FormMode      // Tries to use form struct tags
 )
 
 // JsonValidate should be used to validate a json parsed message, errors returned will have a json paths.
+// These look at the `json="xx"` struct tag for hints how to name the error keys.
 //
 // If an error is returned the type should be of *ValidationError.
 //
@@ -47,6 +49,17 @@ const (
 // Languages can be set to nil, default value will be []language.Tag{language.English}.
 func JsonValidate(ctx context.Context, languages []language.Tag, input any) error {
 	return validate(ctx, languages, input, JsonMode)
+}
+
+// FormValidate should be used to validate a form parsed message, errors returned will have a form paths.
+// These look at the `form="xx"` struct tag for hints how to name the error keys.
+//
+// If an error is returned the type should be of *ValidationError.
+//
+// Ctx can be set to nil, default value will be context.Background().
+// Languages can be set to nil, default value will be []language.Tag{language.English}.
+func FormValidate(ctx context.Context, languages []language.Tag, input any) error {
+	return validate(ctx, languages, input, FormMode)
 }
 
 // GoValidate should be used to validate something within a go codebase with validation errors that apply to the go codebase.
@@ -259,10 +272,12 @@ func (v *Validator) Validate(stack Stack, value *reflect.Value, valueType reflec
 		return
 	}
 
-	goPath, jsonPath := stack.ToPaths()
+	goPath, jsonPath, formPath := stack.ToPaths()
 	path := goPath
 	if v.mode == JsonMode {
 		path = jsonPath
+	} else if v.mode == FormMode {
+		path = formPath
 	}
 
 	v.errors = append(v.errors, FieldErrors{
@@ -295,6 +310,8 @@ outer:
 			stackElement := stack[len(stack)-1]
 			if v.mode == JsonMode {
 				replaceVariable(variable, stackElement.JsonName)
+			} else if v.mode == FormMode {
+				replaceVariable(variable, stackElement.FormName)
 			} else {
 				replaceVariable(variable, stackElement.GoName)
 			}

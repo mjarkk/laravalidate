@@ -10,6 +10,10 @@ func CreateJsonError(errors map[string]string) error {
 	return createCustomError(JsonMode, errors)
 }
 
+func CreateFormError(errors map[string]string) error {
+	return createCustomError(FormMode, errors)
+}
+
 func createCustomError(mode Mode, errors map[string]string) error {
 	fieldErrors := []FieldErrors{}
 	for key, message := range errors {

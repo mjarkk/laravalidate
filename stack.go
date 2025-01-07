@@ -16,6 +16,7 @@ const (
 type StackElement struct {
 	GoName     string
 	JsonName   string
+	FormName   string
 	Index      int // Only for kind == StackKindList
 	Kind       StackKind
 	Parent     *reflect.Value
@@ -24,20 +25,18 @@ type StackElement struct {
 
 type Stack []StackElement
 
-func (s Stack) ToPaths() (golang, json string) {
-	golang = ""
-	json = ""
-
+func (s Stack) ToPaths() (golang, json, form string) {
 	for idx, e := range s {
 		if idx == 0 {
 			golang = e.GoName
 			json = e.JsonName
+			form = e.FormName
 			continue
 		}
 		golang += "." + e.GoName
 		json += "." + e.JsonName
+		form += "." + e.FormName
 	}
-
 	return
 }
 
@@ -46,6 +45,7 @@ func (s Stack) AppendIndex(index int, parent *reflect.Value, parentType reflect.
 	return append(s, StackElement{
 		GoName:     indexStr,
 		JsonName:   indexStr,
+		FormName:   indexStr,
 		Index:      index,
 		Kind:       StackKindList,
 		Parent:     parent,
@@ -54,17 +54,30 @@ func (s Stack) AppendIndex(index int, parent *reflect.Value, parentType reflect.
 }
 
 func (s Stack) AppendField(field reflect.StructField, parent *reflect.Value, parentType reflect.Type) Stack {
-	jsonTag := field.Tag.Get("json")
-	jsonTag = strings.Split(jsonTag, ",")[0]
-
+	jsonTag, ok := field.Tag.Lookup("json")
 	jsonName := field.Name
-	if jsonTag != "" && jsonTag != "-" {
-		jsonName = jsonTag
+	if ok {
+		jsonTag = strings.Split(jsonTag, ",")[0]
+
+		if jsonTag != "" && jsonTag != "-" {
+			jsonName = jsonTag
+		}
+	}
+
+	formTag, ok := field.Tag.Lookup("form")
+	formName := field.Name
+	if ok {
+		formTag = strings.Split(formTag, ",")[0]
+
+		if formTag != "" && formTag != "-" {
+			formName = formTag
+		}
 	}
 
 	return append(s, StackElement{
 		GoName:     field.Name,
 		JsonName:   jsonName,
+		FormName:   formName,
 		Index:      -1,
 		Kind:       StackKindObject,
 		Parent:     parent,
